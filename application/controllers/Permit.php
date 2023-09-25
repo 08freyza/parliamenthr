@@ -1,0 +1,158 @@
+<?php
+
+if (!defined('BASEPATH'))
+    exit('No direct script access allowed');
+
+class Permit extends CI_Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+        $this->load->model('Permit_model');
+        $this->load->library('form_validation');        
+	$this->load->library('datatables');
+    }
+
+    public function index()
+    {
+        $this->template->general('permit/emp_permit_list');
+    } 
+    
+    public function json() {
+        header('Content-Type: application/json');
+        echo $this->Permit_model->json();
+    }
+
+    public function read($id) 
+    {
+        $row = $this->Permit_model->get_by_id($id);
+        if ($row) {
+            $data = array(
+				'button' => 'Read',
+				'action' => 'read',
+		'id' => $row->id,
+		'emp_no' => $row->emp_no,
+		'leave_desc' => $row->leave_desc,
+		'sdate' => $row->sdate,
+		'edate' => $row->edate,
+		'total_day' => $row->total_day,
+	    );
+            $this->template->general('permit/emp_permit_form', $data);
+        } else {
+            $this->session->set_flashdata('message', 'Record Not Found');
+            redirect(site_url('permit'));
+        }
+    }
+
+    public function create() 
+    {
+        $data = array(
+            'button' => 'Create',
+            'action' => site_url('permit/create_action'),
+	    'id' => set_value('id'),
+	    'emp_no' => set_value('emp_no'),
+	    'leave_desc' => set_value('leave_desc'),
+	    'sdate' => set_value('sdate'),
+	    'edate' => set_value('edate'),
+	    'total_day' => set_value('total_day'),
+	);
+        $this->template->general('permit/emp_permit_form', $data);
+    }
+    
+    public function create_action() 
+    {
+        $this->_rules();
+
+        if ($this->form_validation->run() == FALSE) {
+            $this->create();
+        } else {
+            $data = array(
+		'emp_no' => $this->input->post('emp_no',TRUE),
+		'leave_desc' => $this->input->post('leave_desc',TRUE),
+		'sdate' => $this->input->post('sdate',TRUE),
+		'edate' => $this->input->post('edate',TRUE),
+		'total_day' => $this->input->post('total_day',TRUE),
+	    );
+
+            $this->Permit_model->insert($data);
+            $this->session->set_flashdata('message', 'Create Record Success');
+            redirect(site_url('permit'));
+        }
+    }
+    
+    public function update($id) 
+    {
+        $row = $this->Permit_model->get_by_id($id);
+
+        if ($row) {
+            $data = array(
+                'button' => 'Update',
+                'action' => site_url('permit/update_action'),
+		'id' => set_value('id', $row->id),
+		'emp_no' => set_value('emp_no', $row->emp_no),
+		'leave_desc' => set_value('leave_desc', $row->leave_desc),
+		'sdate' => set_value('sdate', $row->sdate),
+		'edate' => set_value('edate', $row->edate),
+		'total_day' => set_value('total_day', $row->total_day),
+	    );
+            $this->template->general('permit/emp_permit_form', $data);
+        } else {
+            $this->session->set_flashdata('message', 'Record Not Found');
+            redirect(site_url('permit'));
+        }
+    }
+    
+    public function update_action() 
+    {
+        $this->_rules();
+
+        if ($this->form_validation->run() == FALSE) {
+            $this->update($this->input->post('id', TRUE));
+        } else {
+            $data = array(
+		'emp_no' => $this->input->post('emp_no',TRUE),
+		'leave_desc' => $this->input->post('leave_desc',TRUE),
+		'sdate' => $this->input->post('sdate',TRUE),
+		'edate' => $this->input->post('edate',TRUE),
+		'total_day' => $this->input->post('total_day',TRUE),
+	    );
+
+            $this->Permit_model->update($this->input->post('id', TRUE), $data);
+            $this->session->set_flashdata('message', 'Update Record Success');
+            redirect(site_url('permit'));
+        }
+    }
+    
+    public function delete($id) 
+    {
+        $row = $this->Permit_model->get_by_id($id);
+
+        if ($row) {
+            $this->Permit_model->delete($id);
+            $this->session->set_flashdata('message', 'Delete Record Success');
+            redirect(site_url('permit'));
+        } else {
+            $this->session->set_flashdata('message', 'Record Not Found');
+            redirect(site_url('permit'));
+        }
+    }
+
+    public function _rules() 
+    {
+	$this->form_validation->set_rules('emp_no', 'emp no', 'trim|required');
+	$this->form_validation->set_rules('leave_desc', 'leave desc', 'trim|required');
+	$this->form_validation->set_rules('sdate', 'sdate', 'trim|required');
+	$this->form_validation->set_rules('edate', 'edate', 'trim|required');
+	$this->form_validation->set_rules('total_day', 'total day', 'trim|required');
+
+	$this->form_validation->set_rules('id', 'id', 'trim');
+	$this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
+    }
+
+}
+
+/* End of file Permit.php */
+/* Location: ./application/controllers/Permit.php */
+/* Please DO NOT modify this information : */
+/* Generated by Harviacode Codeigniter CRUD Generator 2020-01-07 08:14:36 */
+/* http://harviacode.com */

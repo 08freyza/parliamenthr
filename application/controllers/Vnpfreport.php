@@ -1,0 +1,158 @@
+<?php
+
+if (!defined('BASEPATH'))
+    exit('No direct script access allowed');
+
+class Vnpfreport extends CI_Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+        $this->load->model('Vnpfreport_model');
+        $this->load->library('form_validation');        
+	$this->load->library('datatables');
+    }
+
+    public function index()
+    {
+        $this->template->general('vnpfreport/vnpf_history_list');
+    } 
+    
+    public function json() {
+        header('Content-Type: application/json');
+        echo $this->Vnpfreport_model->json();
+    }
+
+    public function read($id) 
+    {
+        $row = $this->Vnpfreport_model->get_by_id($id);
+        if ($row) {
+            $data = array(
+				'button' => 'Read',
+				'action' => 'read',
+		'id' => $row->id,
+		'emp_no' => $row->emp_no,
+		'amount' => $row->amount,
+		'vnpf' => $row->vnpf,
+		'month' => $row->month,
+		'year' => $row->year,
+	    );
+            $this->template->general('vnpfreport/vnpf_history_form', $data);
+        } else {
+            $this->session->set_flashdata('message', 'Record Not Found');
+            redirect(site_url('vnpfreport'));
+        }
+    }
+
+    public function create() 
+    {
+        $data = array(
+            'button' => 'Create',
+            'action' => site_url('vnpfreport/create_action'),
+	    'id' => set_value('id'),
+	    'emp_no' => set_value('emp_no'),
+	    'amount' => set_value('amount'),
+	    'vnpf' => set_value('vnpf'),
+	    'month' => set_value('month',date('m')),
+	    'year' => set_value('year',date('Y')),
+	);
+        $this->template->general('vnpfreport/vnpf_history_form', $data);
+    }
+    
+    public function create_action() 
+    {
+        $this->_rules();
+
+        if ($this->form_validation->run() == FALSE) {
+            $this->create();
+        } else {
+            $data = array(
+		'emp_no' => $this->input->post('emp_no',TRUE),
+		'amount' => $this->input->post('amount',TRUE),
+		'vnpf' => $this->input->post('vnpf',TRUE),
+		'month' => $this->input->post('month',TRUE),
+		'year' => $this->input->post('year',TRUE),
+	    );
+
+            $this->Vnpfreport_model->insert($data);
+            $this->session->set_flashdata('message', 'Create Record Success');
+            redirect(site_url('vnpfreport'));
+        }
+    }
+    
+    public function update($id) 
+    {
+        $row = $this->Vnpfreport_model->get_by_id($id);
+
+        if ($row) {
+            $data = array(
+                'button' => 'Update',
+                'action' => site_url('vnpfreport/update_action'),
+		'id' => set_value('id', $row->id),
+		'emp_no' => set_value('emp_no', $row->emp_no),
+		'amount' => set_value('amount', $row->amount),
+		'vnpf' => set_value('vnpf', $row->vnpf),
+		'month' => set_value('month', $row->month),
+		'year' => set_value('year', $row->year),
+	    );
+            $this->template->general('vnpfreport/vnpf_history_form', $data);
+        } else {
+            $this->session->set_flashdata('message', 'Record Not Found');
+            redirect(site_url('vnpfreport'));
+        }
+    }
+    
+    public function update_action() 
+    {
+        $this->_rules();
+
+        if ($this->form_validation->run() == FALSE) {
+            $this->update($this->input->post('id', TRUE));
+        } else {
+            $data = array(
+		'emp_no' => $this->input->post('emp_no',TRUE),
+		'amount' => $this->input->post('amount',TRUE),
+		'vnpf' => $this->input->post('vnpf',TRUE),
+		'month' => $this->input->post('month',TRUE),
+		'year' => $this->input->post('year',TRUE),
+	    );
+
+            $this->Vnpfreport_model->update($this->input->post('id', TRUE), $data);
+            $this->session->set_flashdata('message', 'Update Record Success');
+            redirect(site_url('vnpfreport'));
+        }
+    }
+    
+    public function delete($id) 
+    {
+        $row = $this->Vnpfreport_model->get_by_id($id);
+
+        if ($row) {
+            $this->Vnpfreport_model->delete($id);
+            $this->session->set_flashdata('message', 'Delete Record Success');
+            redirect(site_url('vnpfreport'));
+        } else {
+            $this->session->set_flashdata('message', 'Record Not Found');
+            redirect(site_url('vnpfreport'));
+        }
+    }
+
+    public function _rules() 
+    {
+	$this->form_validation->set_rules('emp_no', 'emp no', 'trim|required');
+	$this->form_validation->set_rules('amount', 'amount', 'trim|required|numeric');
+	$this->form_validation->set_rules('vnpf', 'vnpf', 'trim|required|numeric');
+	$this->form_validation->set_rules('month', 'month', 'trim|required');
+	$this->form_validation->set_rules('year', 'year', 'trim|required');
+
+	$this->form_validation->set_rules('id', 'id', 'trim');
+	$this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
+    }
+
+}
+
+/* End of file Vnpfreport.php */
+/* Location: ./application/controllers/Vnpfreport.php */
+/* Please DO NOT modify this information : */
+/* Generated by Harviacode Codeigniter CRUD Generator 2020-01-07 12:44:59 */
+/* http://harviacode.com */
